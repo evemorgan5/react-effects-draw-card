@@ -5,6 +5,7 @@ import './App.css';
 
 const BASE_URL = "http://deckofcardsapi.com/api/deck/";
 
+
 function App() {
   const [deck, setDeck] = useState(null);
   const [card, setCard] = useState(null);
@@ -19,27 +20,40 @@ function App() {
     fetchDeck();
   }, []);
 
-  //console.log(deck);
 
   async function fetchCardUsingIdOnButtonClick() {
     const cardResult = await axios.get(`${BASE_URL}/${deck.deck_id}/draw/?count=1`);
-    const cardInfo = cardResult.data.cards[0];
-    setCard( cardInfo.value, cardInfo.suit);
+    const cardData = cardResult.data;
+    setCard(c => {
+      return {
+        value: cardData.cards[0].value,
+        suit: cardData.cards[0].suit
+      };
+    });
+    setDeck(d => {
+      return {
+        ...deck,
+        remaining: cardData.remaining
+      };
+    });
   }
 
-  console.log()
-
+  console.log();
 
   // get card using deck id by axios get request
   // changes cardname array
-
-
-
   return (
     <div className="App">
       <header className="App-header">
         <p>Deck of cards</p>
-        <button>Get card</button>
+
+        {deck && deck.remaining === 50
+          ? <b>Error: no cards remaining!</b>
+          : <button onClick={fetchCardUsingIdOnButtonClick}>Get card</button>
+        }
+        {card &&
+          <p>{card.value} OF {card.suit}</p>
+        }
       </header>
     </div>
   );
